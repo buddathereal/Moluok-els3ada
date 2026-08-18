@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { GoogleGenAI } from "@google/genai";
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { X, ChevronRight, ArrowRight, ArrowLeft, ShoppingBasket, Sparkles, Award, Crown, Compass, Gem } from 'lucide-react';
 import { BEVERAGES_MENU, SOFT_DRINKS, SERVICE_COSTS, EQUIPMENT_DATA, BEVERAGES_CATEGORIES } from './data';
