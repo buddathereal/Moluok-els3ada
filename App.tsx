@@ -7,6 +7,7 @@ import { BEVERAGES_MENU, SOFT_DRINKS, SERVICE_COSTS, EQUIPMENT_DATA, BEVERAGES_C
 import { MenuPackage, EquipmentCategory, EquipmentItem } from './types';
 import { OfficeMap } from './OfficeMap';
 import { useGsapScrollTrigger } from './useGsap';
+import { BookingSection } from './BookingSection';
 
 // --- CONFIGURATION ---
 const USER_LOGO_URL = "https://i.postimg.cc/xj33dFYd/Picsart-26-01-31-03-15-31-627.png"; 
@@ -960,7 +961,6 @@ const App: React.FC = () => {
   const [activeEquipmentCat, setActiveEquipmentCat] = useState<EquipmentCategory | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
-  const [activeStep, setActiveStep] = useState(0);
   const lastScrollY = useRef(0);
 
   // GSAP ScrollTrigger & Card Hover animations initializer
@@ -1001,15 +1001,6 @@ const App: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Auto-cycle the active step for the luxury journey section (0, 1, 2)
-  useEffect(() => {
-    if (view !== 'home') return;
-    const interval = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % 3);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [view]);
 
   // History API Sync
   useEffect(() => {
@@ -1072,14 +1063,11 @@ const App: React.FC = () => {
   const [drinkQuantities, setDrinkQuantities] = useState<Record<string, number>>({});
   const [selectedBeverages, setSelectedBeverages] = useState<string[]>([]);
   const [beverageQuantities, setBeverageQuantities] = useState<Record<string, number>>({});
-  const [selectedSandwiches, setSelectedSandwiches] = useState<string[]>([]);
-  const [sandwichQuantities, setSandwichQuantities] = useState<Record<string, number>>({});
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [equipmentQuantities, setEquipmentQuantities] = useState<Record<string, number>>({});
   const [serviceQuantities, setServiceQuantities] = useState<Record<string, number>>({});
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [hasOpenedCartOnce, setHasOpenedCartOnce] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isEquipmentOnlyOrder, setIsEquipmentOnlyOrder] = useState(false);
   const [pendingPkg, setPendingPkg] = useState<MenuPackage | null>(null);
@@ -1459,27 +1447,29 @@ const App: React.FC = () => {
           showHeader ? 'translate-y-0 opacity-100 pointer-events-auto' : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
-        {/* Right Action: Cart Button (Far right, independent of nav with optimal touch target) */}
-        <div className="absolute right-3 sm:right-6 md:right-10 top-[max(0.75rem,env(safe-area-inset-top))] md:top-1/2 md:-translate-y-1/2 flex items-center justify-center z-10">
-          <motion.button 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsCartOpen(true)}
-            aria-label="سلة الطلبات"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] !pt-0 flex items-center justify-center touch-manipulation focus:outline-none cursor-pointer"
-          >
-            <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 md:w-11 md:h-11 rounded-full royal-btn-secondary !p-0 flex items-center justify-center text-white shadow-lg transition-all group relative border border-white/10">
-              <ShoppingBasket className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-royal-gold group-hover:text-white transition-colors" />
-              {(selectedEquipment.length + selectedBeverages.length + (selectedPkgId ? 1 : 0) + selectedDrinks.length + selectedExtraServices.length) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-royal-gold text-black w-4 h-4 rounded-full flex items-center justify-center text-[8.5px] font-black border border-black shadow-md font-numbers">
-                  {selectedEquipment.length + selectedBeverages.length + (selectedPkgId ? 1 : 0) + selectedDrinks.length + selectedExtraServices.length}
-                </span>
-              )}
-            </div>
-          </motion.button>
-        </div>
+        {/* Right Action: Cart Button (Only shown when not on home page) */}
+        {view !== 'home' && (
+          <div className="absolute right-3 sm:right-6 md:right-10 top-[max(0.75rem,env(safe-area-inset-top))] md:top-1/2 md:-translate-y-1/2 flex items-center justify-center z-10">
+            <motion.button 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsCartOpen(true)}
+              aria-label="سلة الطلبات"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] !pt-0 flex items-center justify-center touch-manipulation focus:outline-none cursor-pointer"
+            >
+              <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 md:w-11 md:h-11 rounded-full royal-btn-secondary !p-0 flex items-center justify-center text-white shadow-lg transition-all group relative border border-white/10">
+                <ShoppingBasket className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-royal-gold group-hover:text-white transition-colors" />
+                {(selectedEquipment.length + selectedBeverages.length + (selectedPkgId ? 1 : 0) + selectedDrinks.length + selectedExtraServices.length) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-royal-gold text-black w-4 h-4 rounded-full flex items-center justify-center text-[8.5px] font-black border border-black shadow-md font-numbers">
+                    {selectedEquipment.length + selectedBeverages.length + (selectedPkgId ? 1 : 0) + selectedDrinks.length + selectedExtraServices.length}
+                  </span>
+                )}
+              </div>
+            </motion.button>
+          </div>
+        )}
 
         {/* Center/Main Navigation */}
         <nav className="flex items-center justify-center gap-4 sm:gap-8 md:gap-10 mx-auto">
@@ -1680,151 +1670,11 @@ const App: React.FC = () => {
               </div>
 
               <div className="relative z-10">
-                {/* Elegant Webflow-Style CTA section styled with our luxury theme */}
-                <section className="py-20 md:py-36 bg-transparent relative overflow-hidden gsap-section">
-                  
-                  <div className="container mx-auto px-4 md:px-6 relative z-10">
-                    <div className="max-w-4xl mx-auto bg-[#0a0a0a]/80 md:bg-[#0a0a0a]/90 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 text-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-xs relative overflow-hidden group gsap-card-interactive">
-                      {/* Subtle inner gold accent border */}
-                      <div className="absolute inset-4 rounded-[2.2rem] border border-[#c5a059]/15 pointer-events-none" />
-                      
-                      {/* Sub-header */}
-                      <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-6 flex flex-col items-center gap-2"
-                      >
-                        <span className="text-xs font-black uppercase tracking-[0.4em] text-[#c5a059]/80 font-numbers">
-                          Reserve Today
-                        </span>
-                        <span className="text-3xl md:text-5xl font-black text-[#c5a059] font-header tracking-normal leading-tight">
-                          رحلتك نحو الكمال
-                        </span>
-                      </motion.div>
-
-                      {/* Main Title */}
-                      <motion.h2
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="text-4xl md:text-6xl font-black text-white font-header mb-6 tracking-tighter uppercase leading-none drop-shadow-md"
-                      >
-                        CHECK YOUR DATE
-                      </motion.h2>
-
-                      {/* Luxury Divider */}
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        whileInView={{ width: "80px" }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="h-[2px] bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mx-auto mb-8 shadow-[0_0_8px_#c5a059]"
-                      />
-
-                      {/* Interactive Luxury Carousel cycling through the 3 Excellence Steps */}
-                      <div className="min-h-[140px] md:min-h-[120px] flex flex-col justify-center items-center mb-8 relative px-4">
-                        <AnimatePresence mode="wait">
-                          {(() => {
-                            const steps = [
-                              { 
-                                num: '01', 
-                                title: 'الاستشارة الملكية', 
-                                desc: 'نجلس معك لنفهم رؤيتك وتفاصيل مناسبتك الخاصة بدقة متناهية ونحدد أفضل الخيارات لك.',
-                                icon: Crown
-                              },
-                              { 
-                                num: '02', 
-                                title: 'تجهيز المعدات', 
-                                desc: 'نوفر لك أرقى المعدات والأدوات الفاخرة التي تناسب ذوقك الرفيع وتصنع تجربة ضيافة فريدة.',
-                                icon: Gem
-                              },
-                              { 
-                                num: '03', 
-                                title: 'التنفيذ الفاخر', 
-                                desc: 'نهتم بكل التفاصيل من مرحلة التجهيز والنقل وحتى الاستقبال والضيافة والخدمة الاحترافية الملكية.',
-                                icon: Sparkles
-                              }
-                            ];
-                            const current = steps[activeStep];
-                            const CurrentIcon = current.icon;
-
-                            return (
-                              <motion.div
-                                key={activeStep}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.4, ease: "easeInOut" }}
-                                className="text-center max-w-2xl mx-auto space-y-4"
-                              >
-                                <div className="flex items-center justify-center gap-2 flex-row-reverse">
-                                  <span className="text-[10px] md:text-xs font-black font-numbers bg-[#c5a059]/10 text-royal-gold px-2 py-0.5 rounded border border-[#c5a059]/20">
-                                    {current.num}
-                                  </span>
-                                  <CurrentIcon className="w-4 h-4 text-royal-gold animate-pulse" />
-                                  <h4 className="text-white text-lg md:text-xl font-black font-header">
-                                    {current.title}
-                                  </h4>
-                                </div>
-                                <p className="text-zinc-300 text-xs md:text-sm leading-relaxed font-medium">
-                                  {current.desc}
-                                </p>
-                              </motion.div>
-                            );
-                          })()}
-                        </AnimatePresence>
-                      </div>
-
-                      {/* Step dots with smooth loader under active step */}
-                      <div className="flex justify-center items-center gap-4 mb-10">
-                        {[0, 1, 2].map((idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setActiveStep(idx)}
-                            className="group relative p-2 outline-none focus:outline-none flex flex-col items-center cursor-pointer"
-                          >
-                            <div className="relative w-12 h-1 bg-white/10 rounded-full overflow-hidden transition-all duration-300 group-hover:bg-white/20">
-                              {activeStep === idx ? (
-                                <motion.div 
-                                  initial={{ width: '0%' }}
-                                  animate={{ width: '100%' }}
-                                  transition={{ duration: 6, ease: 'linear' }}
-                                  key={activeStep}
-                                  className="h-full bg-gradient-to-r from-royal-gold to-[#8b6914] shadow-[0_0_8px_#c5a059]"
-                                />
-                              ) : null}
-                            </div>
-                            <span className={`text-[8px] font-numbers mt-1.5 font-bold transition-colors ${activeStep === idx ? 'text-royal-gold' : 'text-zinc-600'}`}>
-                              0{idx + 1}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* General Description */}
-                      <p className="text-zinc-400 text-xs md:text-sm leading-relaxed max-w-2xl mx-auto mb-10 font-bold px-4">
-                        تواصل معنا اليوم للتحقق من جدول مناسباتنا وحجز موعدك الخاص. يسعدنا مناقشة كافة احتياجاتك وتصميم الباقة والخدمة المثالية التي تليق بضيوفك الكرام وتجعل حدثك مناسبة لا تُنسى.
-                      </p>
-
-                      {/* Contact Us CTA Button */}
-                      <motion.button
-                        id="cta-reserve-btn"
-                        whileHover={{ scale: 1.04, y: -2 }}
-                        whileTap={{ scale: 0.96 }}
-                        onClick={() => setIsCustomerModalOpen(true)}
-                        className="relative group overflow-hidden rounded-full bg-gradient-to-r from-[#edd79d] via-[#c5a059] to-[#98762e] text-[#0a0a0a] px-8 py-4 md:px-12 md:py-4.5 font-header font-black text-sm md:text-base flex items-center gap-3 justify-center mx-auto shadow-[0_10px_35px_rgba(197,160,89,0.4)] hover:shadow-[0_16px_50px_rgba(197,160,89,0.65)] transition-all duration-300 border border-[#fff2cb]/60 cursor-pointer"
-                      >
-                        {/* Shimmer light reflection effect on hover */}
-                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 ease-out pointer-events-none" />
-                        
-                        <span className="tracking-wide text-sm md:text-base font-black">احجز موعدك وتواصل معنا الآن</span>
-                        <ArrowLeft className="w-4.5 h-4.5 text-[#0a0a0a] group-hover:-translate-x-1 transition-transform" />
-                      </motion.button>
-                    </div>
-                  </div>
-                </section>
+                {/* Redesigned Royal Booking/Reservation Section */}
+                <BookingSection 
+                  onBookNow={() => setIsCustomerModalOpen(true)}
+                  onBrowseEquipment={() => navigateTo('tools', { activeEquipmentCatId: null })}
+                />
 
                 {/* Gallery Section - Royal Moments */}
                 <section className="py-28 md:py-36 bg-transparent relative overflow-hidden gsap-section">
@@ -2741,37 +2591,39 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <FloatingCart 
-        navigateTo={navigateTo}
-        selectedEquipment={selectedEquipment}
-        equipmentQuantities={equipmentQuantities}
-        onQuantityChange={updateEquipmentQty}
-        onRemoveEquipment={removeEquipment}
-        onShare={handleEquipmentOnlyOrder}
-        allEquipmentItems={allEquipmentItems}
-        selectedBeverages={selectedBeverages}
-        beverageQuantities={beverageQuantities}
-        onBeverageQuantityChange={handleBeverageQty}
-        onRemoveBeverage={removeBeverage}
-        selectedDrinks={selectedDrinks}
-        drinkQuantities={drinkQuantities}
-        onDrinkQuantityChange={handleDrinkQty}
-        onRemoveDrink={removeDrink}
-        selectedExtraServices={selectedExtraServices}
-        serviceQuantities={serviceQuantities}
-        onServiceQuantityChange={handleServiceQty}
-        onRemoveService={removeService}
-        selectedPkg={selectedPkg}
-        onRemovePkg={removePkg}
-        calcPax={calcPax}
-        onPaxChange={setCalcPax}
-        onMenuOrder={handleOrder}
-        totalPrice={calculateTotal()}
-        onClearAll={clearAll}
-        isOpen={isCartOpen}
-        setIsOpen={setIsCartOpen}
-        onZoom={(img) => setLightboxImage(img)}
-      />
+      {view !== 'home' && (
+        <FloatingCart 
+          navigateTo={navigateTo}
+          selectedEquipment={selectedEquipment}
+          equipmentQuantities={equipmentQuantities}
+          onQuantityChange={updateEquipmentQty}
+          onRemoveEquipment={removeEquipment}
+          onShare={handleEquipmentOnlyOrder}
+          allEquipmentItems={allEquipmentItems}
+          selectedBeverages={selectedBeverages}
+          beverageQuantities={beverageQuantities}
+          onBeverageQuantityChange={handleBeverageQty}
+          onRemoveBeverage={removeBeverage}
+          selectedDrinks={selectedDrinks}
+          drinkQuantities={drinkQuantities}
+          onDrinkQuantityChange={handleDrinkQty}
+          onRemoveDrink={removeDrink}
+          selectedExtraServices={selectedExtraServices}
+          serviceQuantities={serviceQuantities}
+          onServiceQuantityChange={handleServiceQty}
+          onRemoveService={removeService}
+          selectedPkg={selectedPkg}
+          onRemovePkg={removePkg}
+          calcPax={calcPax}
+          onPaxChange={setCalcPax}
+          onMenuOrder={handleOrder}
+          totalPrice={calculateTotal()}
+          onClearAll={clearAll}
+          isOpen={isCartOpen}
+          setIsOpen={setIsCartOpen}
+          onZoom={(img) => setLightboxImage(img)}
+        />
+      )}
 
       <CustomerInfoModal 
         isOpen={isCustomerModalOpen}
@@ -2782,18 +2634,35 @@ const App: React.FC = () => {
       />
 
       <footer className="py-24 md:py-36 bg-[#020202] text-center relative overflow-hidden">
-         {/* Harmonious luxury background image with cinematic blur, lighting and depth */}
-         <div 
-            className="absolute inset-0 bg-cover bg-center pointer-events-none scale-105" 
-            style={{ 
-               backgroundImage: `url('https://res.cloudinary.com/dqrs3mdmi/image/upload/v1774826480/WhatsApp_Image_2026-03-30_at_1.20.08_AM_1_pbs9a5.jpg')`,
-               filter: 'blur(1.5px) brightness(0.62) contrast(1.12) saturate(1.1)'
-            }}
-          />
+         {/* Background Video with luxury atmospheric treatment */}
+         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <video 
+               autoPlay 
+               loop 
+               muted 
+               playsInline 
+               preload="auto"
+               className="w-full h-full object-cover object-center scale-105"
+               style={{ 
+                  filter: 'blur(0.5px) brightness(0.65) contrast(1.1) saturate(1.05)'
+               }}
+            >
+               <source src="https://res.cloudinary.com/dhktkzpap/video/upload/171262654_1788182400783352_jlqkjm.mp4" type="video/mp4" />
+               <source src="https://res.cloudinary.com/dhktkzpap/video/upload/171262654_1788182400783352_jlqkjm.webm" type="video/webm" />
+               {/* Embed iframe fallback */}
+               <iframe 
+                  src="https://player.cloudinary.com/embed/?cloud_name=dhktkzpap&public_id=171262654_1788182400783352_jlqkjm&player[muted]=true&player[autoplay]=true&player[loop]=true&player[controls]=false" 
+                  className="w-full h-full object-cover border-0"
+                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                  title="Footer Background Video"
+               />
+            </video>
+         </div>
+
          {/* Cinematic gradient blend connecting seamlessly with the page */}
-         <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-black/50 to-[#020202]" />
+         <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-black/45 to-[#020202] pointer-events-none" />
          {/* Subtle royal vignette */}
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.15)_0%,rgba(2,2,2,0.8)_100%)] pointer-events-none" />
+         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1)_0%,rgba(2,2,2,0.75)_100%)] pointer-events-none" />
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-royal-gold/8 blur-[130px] rounded-full pointer-events-none"></div>
 
          <div className="flex justify-center items-center mb-10 mx-auto max-w-full relative z-10" style={{ width: '916px', height: '132.9896px' }}>
